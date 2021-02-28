@@ -16,3 +16,6 @@ WHERE id = ?;
 
 selectAllRecords:
 SELECT * FROM Record;
+
+checkDb:
+SELECT 1;
