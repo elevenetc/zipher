@@ -1,0 +1,18 @@
+CREATE TABLE Record(
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+insertRecord:
+INSERT INTO Record(id, name)
+VALUES(?, ?);
+
+removeAllRecords:
+DELETE FROM Record;
+
+selectRecordById:
+SELECT * FROM Record
+WHERE id = ?;
+
+selectAllRecords:
+SELECT * FROM Record;
