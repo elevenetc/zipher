@@ -1,11 +1,13 @@
 package com.elevenetc.zipher.androidApp
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.elevenetc.zipher.shared.Dao
-import com.elevenetc.zipher.shared.DatabaseDriverFactory
+import com.elevenetc.zipher.androidApp.App.Companion.dao
 import com.elevenetc.zipher.shared.Greeting
+import com.elevenetc.zipher.shared.InvalidDbPassword
 
 fun greet(): String {
     return Greeting().greeting()
@@ -16,19 +18,28 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val tv: TextView = findViewById(R.id.text_view)
+        val textStatus: TextView = findViewById(R.id.text_status)
+        val editPassword: EditText = findViewById(R.id.edit_password)
+        val btnUnlock: Button = findViewById(R.id.btn_unlock)
 
-        val dao = Dao("123", DatabaseDriverFactory(applicationContext))
-        val allRecords = dao.getAllRecords()
 
-        if (allRecords.isEmpty()) {
-            dao.insertRecord("first-record")
-            tv.text = "First record created: "
+
+        if (dao.isLocked()) {
+            textStatus.text = "DB is locked"
         } else {
-            val first = allRecords.first()
-            tv.text = "Record retrieved: " + first.id
+            textStatus.text = "DB is unlocked"
         }
 
-        //tv.text = greet()
+        btnUnlock.setOnClickListener {
+            val password = editPassword.text.toString()
+            try {
+                dao.unlock(password)
+                textStatus.text = "DB is unlocked"
+            } catch (t: InvalidDbPassword) {
+                t.printStackTrace()
+                textStatus.text = "Password is invalid. Try another one."
+            }
+
+        }
     }
 }
