@@ -2,10 +2,43 @@ package com.elevenetc.zipher.shared
 
 import com.elevenetc.zipher.AppDatabase
 import com.elevenetc.zipher.Record
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
+import kotlin.time.ExperimentalTime
+import kotlin.time.TimeSource
 
 class Dao(private val dbDriverFactory: DatabaseDriverFactory) {
 
     private var db: AppDatabase? = null
+
+    @ExperimentalTime
+    fun runSomBack(handler: (Long) -> Unit) {
+        GlobalScope.launch(Background) {
+            //TimeSource.
+            val mark = TimeSource.Monotonic.markNow()
+            delay(5000)
+            GlobalScope.launch(Main) {
+                handler(mark.elapsedNow().inMilliseconds.toLong())
+            }
+        }
+    }
+
+    fun flowCall(): Flow<String> = flow {
+        (1..10).forEach {
+            println(">>>>: emitting: $it")
+            emit(it.toString())
+            delay(1000)
+        }
+    }.flowOn(Background)
+
+    fun mutableFlowCall(): MutableStateFlow<String> {
+        return MutableStateFlow("zed")
+    }
 
     fun clearDb() {
         safeDb().appDatabaseQueries.removeAllRecords()
@@ -22,6 +55,10 @@ class Dao(private val dbDriverFactory: DatabaseDriverFactory) {
             db = null
             throw InvalidDbPassword(e)
         }
+    }
+
+    fun lock() {
+        db = null
     }
 
     fun isLocked(): Boolean {

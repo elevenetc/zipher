@@ -30,7 +30,17 @@ kotlin {
 
         val commonMain by getting {
             dependencies {
-                implementation("com.squareup.sqldelight:runtime:${Dependencies.SQLDELIGHT}")
+                implementation("com.squareup.sqldelight:runtime:${Versions.sqlDelight}")
+                //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.8")
+                //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core") {
+                    version {
+                        strictly(Versions.coroutinesNative)
+                    }
+                }
+
+                implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.4.31")
             }
         }
 
@@ -41,13 +51,16 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation("com.google.android.material:material:1.2.1")
-                implementation("com.squareup.sqldelight:android-driver:${Dependencies.SQLDELIGHT}")
+                implementation("com.squareup.sqldelight:android-driver:${Versions.sqlDelight}")
                 implementation("net.zetetic:android-database-sqlcipher:4.4.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2")
             }
         }
         val iosMain by getting {
             dependencies {
-                implementation("com.squareup.sqldelight:native-driver:${Dependencies.SQLDELIGHT}")
+                implementation("com.squareup.sqldelight:native-driver:${Versions.sqlDelight}")
+
+                //implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-native:1.3.8")
                 implementation("co.touchlab:sqliter:0.7.1") {
                     version {
                         strictly("0.7.1")

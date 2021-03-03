@@ -20,6 +20,18 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let flow = dao.flowCall()
+        let collector = Collector<String>(callback: {_ in
+            print(">>>")
+        })
+        
+//        flow.collect(collector: collector, completionHandler: { (s1: KotlinUnit?, s2: Error) -> Void in
+//            print("zed")
+//        })
+        
+        flow.collect(collector: collector) { (result: KotlinUnit?, error: Error?) in
+            print("completion")
+        }
         
         if(dao.isLocked()){
             labelStatus.text = "locked"
@@ -43,11 +55,15 @@ class LoginViewController: UIViewController {
         } catch let error as KotlinException {
             sender.isEnabled = true
             print(error)
-        } catch let error as NSError {
+        } catch let error as NSError{
+            
+            if(error.isShared(InvalidDbPassword.self) && 1 == 1){
+                
+            }
+            
             sender.isEnabled = true
-            error.userInfo
             print(error)
-        } catch{
+        } catch {
             sender.isEnabled = true
             print("enknown error")
             print(error)
@@ -65,4 +81,23 @@ class LoginViewController: UIViewController {
     }
     */
 
+}
+
+extension NSError {
+    func isShared(_ exception:AnyClass)-> Bool{
+        //exception.class().na
+        return true
+    }
+}
+
+class Collector<T>: Kotlinx_coroutines_coreFlowCollector {
+    let callback: (T) -> Void
+    init(callback: @escaping (T) -> Void) {
+        self.callback = callback
+    }
+
+    func emit(value: Any?, completionHandler: @escaping (KotlinUnit?, Error?) -> Void) {
+        callback(value as! T)
+        completionHandler(KotlinUnit(), nil)
+    }
 }

@@ -6,9 +6,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.30")
-        classpath("com.android.tools.build:gradle:4.1.2")
-        classpath("com.squareup.sqldelight:gradle-plugin:${Dependencies.SQLDELIGHT}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlinGradlePlugin}")
+        classpath("com.android.tools.build:gradle:${Versions.androidGradlePlugin}")
+        classpath("com.squareup.sqldelight:gradle-plugin:${Versions.sqlDelight}")
     }
 }
 
