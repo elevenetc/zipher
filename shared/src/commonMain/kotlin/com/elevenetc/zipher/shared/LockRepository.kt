@@ -3,11 +3,11 @@ package com.elevenetc.zipher.shared
 import com.elevenetc.zipher.shared.LockRepository.State.Locked
 import com.elevenetc.zipher.shared.LockRepository.State.Unlocked
 
-class LockRepository(val dao: Dao) {
+class LockRepository(val dao: Dao, val keyValue: KeyValueStorage) {
 
     var state: State = Locked
 
-    fun hasPassword(): Boolean {
+    fun isLocked(): Boolean {
         return dao.isLocked()
     }
 
@@ -16,6 +16,7 @@ class LockRepository(val dao: Dao) {
             try {
                 dao.unlock(pass)
                 state = Unlocked
+                keyValue.store("hasKey", true)
             } catch (e: InvalidDbPassword) {
 
             }
@@ -23,13 +24,14 @@ class LockRepository(val dao: Dao) {
     }
 
     fun lock() {
-        if (state is Unlocked && hasPassword()) {
+        if (isLocked()) {
             state = Locked
+            dao.lock()
         }
     }
 
     fun lock(pass: List<Char>) {
-        if (state is Unlocked && !hasPassword()) {
+        if (!isLocked()) {
             dao.lock()
             state = Locked
         }
@@ -44,6 +46,10 @@ class LockRepository(val dao: Dao) {
 
             }
         }
+    }
+
+    fun hasPassword(): Boolean {
+        return keyValue.get("hasKey", false)
     }
 
     sealed class State {

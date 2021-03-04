@@ -49,7 +49,11 @@ class LockViewModel(private val repository: LockRepository) : ViewModel() {
                 state.tryEmit(CreatingLockVerify(s.lock, ""))
             } else if (s is CreatingLockVerify) {
                 if (s.lock == s.verify) {
-                    repository.createAndUnlock(s.lock)
+                    try {
+                        repository.createAndUnlock(s.lock)
+                    } catch (e: Exception) {
+                        //TODO: verify is db already has key
+                    }
                     state.tryEmit(LockCreated)
                 } else {
                     state.tryEmit(InvalidPasswordVerification)

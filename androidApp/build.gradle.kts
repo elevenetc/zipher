@@ -9,6 +9,8 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.2.0")
     implementation("androidx.constraintlayout:constraintlayout:2.0.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutinesNative}")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.3.2")
+    implementation("org.koin:koin-android:2.2.0-rc-2")
 }
 
 android {
