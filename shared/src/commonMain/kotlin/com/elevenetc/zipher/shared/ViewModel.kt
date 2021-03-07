@@ -7,7 +7,7 @@ import kotlin.coroutines.CoroutineContext
 
 open class ViewModel : CoroutineScope {
 
-    val state = MutableStateFlow<ViewState>(Loading)
+    val state = MutableStateFlow<StateTransition>(StateTransition(InitState, InitState))
 
     open fun onUserAction(action: UserAction) {
 
@@ -15,6 +15,9 @@ open class ViewModel : CoroutineScope {
 
     open class UserAction
     open class ViewState
+    object InitState : ViewState()
+
+    data class StateTransition(val currentState: ViewState, val prevState: ViewState)
 
     object Loading : ViewState()
     data class Error(val t: Throwable) : ViewState()

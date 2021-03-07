@@ -4,16 +4,20 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.LayoutInflater
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.widget.addTextChangedListener
 import com.elevenetc.zipher.shared.LockViewModel.*
 import com.elevenetc.zipher.shared.ViewModel
+import com.elevenetc.zipher.shared.ViewModel.StateTransition
 
 
 class LockStateView(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
     val textState: TextView
-    val textLock: TextView
+    val textLock: EditText
 
     lateinit var userActionListener: (ViewModel.UserAction) -> Unit
     val entry = mutableListOf<Char>()
@@ -22,12 +26,40 @@ class LockStateView(context: Context, attrs: AttributeSet?) : ConstraintLayout(c
         LayoutInflater.from(context).inflate(R.layout.view_lock_state, this)
         textState = findViewById(R.id.text_state)
         textLock = findViewById(R.id.text_lock)
-        isFocusable = true
-        isFocusableInTouchMode = true
+        //isFocusable = true
+        //isFocusableInTouchMode = true
 
-        setOnClickListener {
-            focusAndShowKeyboard()
+//        setOnClickListener {
+//            //focusAndShowKeyboard()
+//        }
+
+        textLock.addTextChangedListener {
+            userActionListener(PassEntry(textLock.text.toString()))
         }
+
+        textLock.setOnEditorActionListener { v, actionId, keyEvent ->
+            if (actionId == EditorInfo.IME_ACTION_NEXT
+                || keyEvent.action == KeyEvent.ACTION_DOWN
+                || keyEvent.action == KeyEvent.KEYCODE_ENTER
+            ) {
+                userActionListener(Next)
+                true
+
+            }
+            false
+        }
+
+//        textLock.setOnKeyListener { v, keyCode, event ->
+//            if (keyCode == KeyEvent.KEYCODE_DEL) {
+//                userActionListener(Delete)
+//                true
+//            } else if (keyCode == KeyEvent.KEYCODE_ENTER) {
+//                userActionListener(Next)
+//                true
+//            } else {
+//                false
+//            }
+//        }
 
 //        addOnUnhandledKeyEventListener(object : OnUnhandledKeyEventListener {
 //            override fun onUnhandledKeyEvent(v: View?, event: KeyEvent): Boolean {
@@ -58,14 +90,15 @@ class LockStateView(context: Context, attrs: AttributeSet?) : ConstraintLayout(c
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_UP) {
             if (event.isPrintingKey) {
-                userActionListener(PassEntry(event.unicodeChar.toChar()))
+                //userActionListener(PassEntry(event.unicodeChar.toChar()))
+                //userActionListener(PassEntry(textLock.text.toString()))
                 return true
             } else {
 
                 if (keyCode == KeyEvent.KEYCODE_DEL) {
-                    userActionListener(Delete)
+                    //userActionListener(Delete)
                 } else if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    userActionListener(Next)
+                    //userActionListener(Next)
                 }
 
                 return false
@@ -75,8 +108,9 @@ class LockStateView(context: Context, attrs: AttributeSet?) : ConstraintLayout(c
         }
     }
 
-    fun handleState(state: ViewModel.ViewState) {
+    fun handleState(transition: StateTransition) {
 
+        val state = transition.currentState
         val stateName = state.javaClass.simpleName
 
 
@@ -87,7 +121,10 @@ class LockStateView(context: Context, attrs: AttributeSet?) : ConstraintLayout(c
             //editPassword.setText(state.lock.toString())
         } else if (state is CreatingLockVerify) {
             textState.text = stateName + " lock: " + state.lock + " verify:" + state.verify
-            //editPassword.setText(state.verify.toString())
+
+            if (transition.prevState is CreatingLock) {
+                textLock.text.clear()
+            }
         } else if (state is InvalidPasswordVerification) {
             textState.text = "Verification is invalid. Enter new pass."
         } else if (state is UnlockingLock) {

@@ -5,7 +5,7 @@ import android.view.View
 import com.elevenetc.zipher.androidApp.navigation.Navigator
 import com.elevenetc.zipher.shared.LockViewModel
 import com.elevenetc.zipher.shared.LockViewModel.*
-import com.elevenetc.zipher.shared.ViewModel.ViewState
+import com.elevenetc.zipher.shared.ViewModel.StateTransition
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -62,12 +62,14 @@ class LockFragment : BaseFragment(R.layout.fragment_lock) {
 
     override fun onResume() {
         super.onResume()
-        stateView.focusAndShowKeyboard()
+        //stateView.focusAndShowKeyboard()
     }
 
-    override fun handleState(state: ViewState) {
+    override fun handleState(transition: StateTransition) {
 
-        stateView.handleState(state)
+        val state = transition.currentState
+
+        stateView.handleState(transition)
 
         if (state is LockCreated || state is Unlocked) {
             navigator.replaceRootScreen(HomeFragment())

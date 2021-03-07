@@ -6,6 +6,9 @@ class LockViewModel(private val repository: LockRepository) : ViewModel() {
 
 
     override fun onUserAction(action: UserAction) {
+
+        val s = state.value.currentState
+
         if (action is GetLockState) {
             launch {
 
@@ -16,37 +19,36 @@ class LockViewModel(private val repository: LockRepository) : ViewModel() {
                     if (isLocked) {
 
                         if (hasPassword) {
-                            state.tryEmit(UnlockingLock(""))
+                            updateState(UnlockingLock(""))
                         } else {
-                            state.tryEmit(CreatingLock(""))
+                            updateState(CreatingLock(""))
                         }
 
 
                     } else {
-                        state.tryEmit(Unlocked)
+                        updateState(Unlocked)
                     }
                 } else {
-                    state.tryEmit(Unlocked)
+                    updateState(Unlocked)
                 }
             }
         } else if (action is PassEntry) {
-            val s = state.value
+
+            val newKey = action.value
             if (s is CreatingLock) {
-                state.tryEmit(CreatingLock(s.lock + action.value))
+                updateState(CreatingLock(newKey))
             } else if (s is CreatingLockVerify) {
-                state.tryEmit(CreatingLockVerify(s.lock, s.verify + action.value))
+                updateState(CreatingLockVerify(s.lock, newKey))
             } else if (s is InvalidPasswordVerification) {
-                state.tryEmit(CreatingLock(""))
+                updateState(CreatingLock(""))
             } else if (s is UnlockingLock) {
-                val lock = s.lock + action.value
-                state.tryEmit(UnlockingLock(lock))
+                updateState(UnlockingLock(newKey))
             } else if (s is InvalidUnlockPass) {
-                state.tryEmit(UnlockingLock(action.value + ""))
+                updateState(UnlockingLock(newKey + ""))
             }
         } else if (action is Next) {
-            val s = state.value
             if (s is CreatingLock) {
-                state.tryEmit(CreatingLockVerify(s.lock, ""))
+                updateState(CreatingLockVerify(s.lock, ""))
             } else if (s is CreatingLockVerify) {
                 if (s.lock == s.verify) {
                     try {
@@ -54,41 +56,45 @@ class LockViewModel(private val repository: LockRepository) : ViewModel() {
                     } catch (e: Exception) {
                         //TODO: verify is db already has key
                     }
-                    state.tryEmit(LockCreated)
+                    updateState(LockCreated)
                 } else {
-                    state.tryEmit(InvalidPasswordVerification)
+                    updateState(InvalidPasswordVerification)
                 }
             } else if (s is UnlockingLock) {
                 repository.unlock(s.lock)
                 if (repository.state is LockRepository.State.Unlocked) {
-                    state.tryEmit(Unlocked)
+                    updateState(Unlocked)
                 } else {
-                    state.tryEmit(InvalidUnlockPass)
+                    updateState(InvalidUnlockPass)
                 }
             }
         } else if (action is Delete) {
-            val s = state.value
             if (s is CreatingLock) {
                 val lock = s.lock
                 if (lock.isNotEmpty()) {
-                    state.tryEmit(CreatingLock(lock.substring(0, lock.length - 1)))
+                    updateState(CreatingLock(lock.substring(0, lock.length - 1)))
                 }
             } else if (s is CreatingLockVerify) {
                 val lock = s.verify
                 if (lock.isNotEmpty()) {
-                    state.tryEmit(CreatingLockVerify(s.lock, lock.substring(0, lock.length - 1)))
+                    updateState(CreatingLockVerify(s.lock, lock.substring(0, lock.length - 1)))
                 }
             } else if (s is UnlockingLock) {
                 val lock = s.lock
                 if (lock.isNotEmpty()) {
-                    state.tryEmit(UnlockingLock(lock.substring(0, lock.length - 1)))
+                    updateState(UnlockingLock(lock.substring(0, lock.length - 1)))
                 }
             }
         }
     }
 
+    private fun updateState(newState: ViewState) {
+        val currentState = state.value.currentState
+        state.tryEmit(StateTransition(newState, currentState))
+    }
+
     object GetLockState : UserAction()
-    data class PassEntry(val value: Char) : UserAction()
+    data class PassEntry(val value: String) : UserAction()
     object Next : UserAction()
     object Delete : UserAction()
 
