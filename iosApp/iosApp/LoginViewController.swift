@@ -9,84 +9,44 @@
 import UIKit
 import shared
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var textFieldPassword: UITextField!
-    @IBOutlet weak var buttonLogin: UIButton!
     @IBOutlet weak var labelStatus: UILabel!
-    
-    let dao = Dao(dbDriverFactory: DatabaseDriverFactory())
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
+    
+        textFieldPassword.becomeFirstResponder()
         
-        let flow = dao.flowCall()
-        let collector = Collector<String>(callback: {_ in
-            print(">>>")
+        let collector = Collector<ViewModel.StateTransition>(callback: {transition in
+            let currentState = transition.currentState
+            self.labelStatus.text = String(describing: transition)
+            
+            print("state update: \(currentState)")
+            
+            if(currentState is LockViewModel.Unlocked){
+                self.textFieldPassword.resignFirstResponder()
+                self.performSegue(withIdentifier: "unlocked", sender: self)
+            }
         })
         
-//        flow.collect(collector: collector, completionHandler: { (s1: KotlinUnit?, s2: Error) -> Void in
-//            print("zed")
-//        })
-        
-        flow.collect(collector: collector) { (result: KotlinUnit?, error: Error?) in
+        lockViewModel.state.collect(collector: collector) { (result: KotlinUnit?, error: Error?) in
             print("completion")
         }
+        lockViewModel.onUserAction(action: LockViewModel.GetLockState())
         
-        if(dao.isLocked()){
-            labelStatus.text = "locked"
-        }else{
-            labelStatus.text = "unlocked"
-        }
-        
+        textFieldPassword.delegate = self
     }
     
-    @IBAction func handleLogin(_ sender: UIButton) {
-        let password = textFieldPassword.text!
-        
-        do {
-            try dao.unlock(key: password)
-            labelStatus.text = "Unlocked"
-            sender.isEnabled = false
-        } catch let error as InvalidDbPassword {
-            labelStatus.text = "Invalid password"
-            sender.isEnabled = true
-            print(error)
-        } catch let error as KotlinException {
-            sender.isEnabled = true
-            print(error)
-        } catch let error as NSError{
-            
-            if(error.isShared(InvalidDbPassword.self) && 1 == 1){
-                
-            }
-            
-            sender.isEnabled = true
-            print(error)
-        } catch {
-            sender.isEnabled = true
-            print("enknown error")
-            print(error)
-        }
-        
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        lockViewModel.onUserAction(action: LockViewModel.Next())
+        return false
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
-}
-
-extension NSError {
-    func isShared(_ exception:AnyClass)-> Bool{
-        //exception.class().na
-        return true
+    @IBAction func onPasswordChanged(_ sender: UITextField, forEvent event: UIEvent) {
+        let key = sender.text!
+        lockViewModel.onUserAction(action: LockViewModel.PassEntry(value: key))
     }
 }
 

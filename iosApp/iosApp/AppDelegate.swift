@@ -1,4 +1,10 @@
 import UIKit
+import shared
+
+let dao = Dao(dbDriverFactory: DatabaseDriverFactory())
+let keyValue = KeyValueStorage()
+let lockRepository = LockRepository(dao: dao, keyValue: keyValue)
+let lockViewModel = LockViewModel(repository: lockRepository)
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
