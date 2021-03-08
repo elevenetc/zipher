@@ -21,13 +21,16 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         
         let collector = Collector<ViewModel.StateTransition>(callback: {transition in
             let currentState = transition.currentState
+            let prevState = transition.prevState
             self.labelStatus.text = String(describing: transition)
             
             print("state update: \(currentState)")
             
-            if(currentState is LockViewModel.Unlocked){
+            if(currentState is LockViewModel.Unlocked || currentState is LockViewModel.LockCreated){
                 self.textFieldPassword.resignFirstResponder()
                 self.performSegue(withIdentifier: "unlocked", sender: self)
+            }else if(currentState is LockViewModel.CreatingLockVerify && prevState is LockViewModel.CreatingLock){
+                self.textFieldPassword.text = ""
             }
         })
         
