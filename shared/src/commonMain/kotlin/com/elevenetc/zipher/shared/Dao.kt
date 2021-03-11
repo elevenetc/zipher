@@ -40,6 +40,10 @@ class Dao(private val dbDriverFactory: DatabaseDriverFactory) {
         return MutableStateFlow("zed")
     }
 
+    fun getById(id: String): Record? {
+        return safeDb().appDatabaseQueries.selectRecordById(id).executeAsOneOrNull()
+    }
+
     fun clearDb() {
         safeDb().appDatabaseQueries.removeAllRecords()
     }
@@ -65,7 +69,19 @@ class Dao(private val dbDriverFactory: DatabaseDriverFactory) {
         return db == null
     }
 
-    fun getAllRecords(): List<Record> {
+    fun update(record: Record) {
+        safeDb().appDatabaseQueries.update(record.name, record.id)
+    }
+
+    fun deleteById(id: String) {
+        safeDb().appDatabaseQueries.removeById(id)
+    }
+
+    fun getAllRecords(): Flow<List<Record>> = flow {
+        emit(safeDb().appDatabaseQueries.selectAllRecords().executeAsList())
+    }.flowOn(Background)
+
+    fun getAllRecordsSync(): List<Record> {
         return safeDb().appDatabaseQueries.selectAllRecords().executeAsList()
     }
 

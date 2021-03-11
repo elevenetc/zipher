@@ -7,6 +7,10 @@ insertRecord:
 INSERT INTO Record(id, name)
 VALUES(?, ?);
 
+removeById:
+DELETE FROM Record
+WHERE id = ?;
+
 removeAllRecords:
 DELETE FROM Record;
 
@@ -16,6 +20,11 @@ WHERE id = ?;
 
 selectAllRecords:
 SELECT * FROM Record;
+
+update:
+UPDATE Record
+SET name = ?
+WHERE id = ?;
 
 checkDb:
 SELECT 1;
