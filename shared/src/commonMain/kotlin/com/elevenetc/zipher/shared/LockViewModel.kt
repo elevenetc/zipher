@@ -88,11 +88,6 @@ class LockViewModel(private val repository: LockRepository) : ViewModel() {
         }
     }
 
-    private fun updateState(newState: ViewState) {
-        val currentState = state.value.currentState
-        state.tryEmit(StateTransition(newState, currentState))
-    }
-
     object GetLockState : UserAction()
     data class PassEntry(val value: String) : UserAction()
     object Next : UserAction()

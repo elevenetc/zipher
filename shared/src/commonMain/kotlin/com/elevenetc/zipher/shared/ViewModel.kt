@@ -7,10 +7,17 @@ import kotlin.coroutines.CoroutineContext
 
 open class ViewModel : CoroutineScope {
 
-    val state = MutableStateFlow<StateTransition>(StateTransition(InitState, InitState))
+    var currentState: ViewState = InitState
+    val state = MutableStateFlow(StateTransition(currentState, currentState))
 
     open fun onUserAction(action: UserAction) {
 
+    }
+
+    protected fun updateState(newState: ViewState) {
+        val oldState = currentState
+        currentState = newState
+        state.tryEmit(StateTransition(currentState, oldState))
     }
 
     open class UserAction
