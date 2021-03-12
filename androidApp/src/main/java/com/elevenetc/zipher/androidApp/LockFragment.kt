@@ -2,6 +2,7 @@ package com.elevenetc.zipher.androidApp
 
 import android.os.Bundle
 import android.view.View
+import com.elevenetc.zipher.androidApp.home.HomeFragment
 import com.elevenetc.zipher.androidApp.navigation.Navigator
 import com.elevenetc.zipher.shared.LockViewModel
 import com.elevenetc.zipher.shared.LockViewModel.*

@@ -9,6 +9,7 @@ import com.elevenetc.zipher.androidApp.R
 import com.elevenetc.zipher.androidApp.navigation.Navigator
 import com.elevenetc.zipher.androidApp.navigation.initNavigation
 import com.elevenetc.zipher.androidApp.records.RecordsFragment
+import com.elevenetc.zipher.androidApp.settings.SettingsFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.koin.android.ext.android.inject
 
@@ -31,7 +32,7 @@ class HomeFragment : Fragment() {
         navView.initNavigation(
             linkedMapOf(
                 Pair(R.id.navigation_home, RecordsFragment()),
-                Pair(R.id.navigation_dashboard, DashboardFragment()),
+                Pair(R.id.navigation_dashboard, Fragment()),
                 Pair(R.id.navigation_settings, SettingsFragment())
             ),
             R.id.main_fragment_container,
