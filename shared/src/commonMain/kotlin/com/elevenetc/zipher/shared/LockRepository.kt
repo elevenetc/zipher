@@ -24,7 +24,7 @@ class LockRepository(val dao: Dao, val keyValue: KeyValueStorage) {
     }
 
     fun lock() {
-        if (isLocked()) {
+        if (!isLocked()) {
             state = Locked
             dao.lock()
         }

@@ -1,6 +1,7 @@
 package com.elevenetc.zipher.androidApp.navigation
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -26,22 +27,27 @@ fun BottomNavigationView.initNavigation(
 
         val currentFragment = fm.getVisible()
 
-        //TODO: add error message if currentFragment is null
-
-        if (currentFragment === newFragment) {
-            true
-        } else {
-            var transaction = fm.beginTransaction().hide(currentFragment!!)
-
-            transaction = if (newFragment.isAdded) {
-                transaction.show(newFragment)
-            } else {
-                transaction.add(container, newFragment)
+        when {
+            currentFragment == null -> {
+                Log.e("navigator", "unable to find visible fragment. FM has " + fm.fragments)
+                false
             }
+            currentFragment === newFragment -> {
+                true
+            }
+            else -> {
+                var transaction = fm.beginTransaction().hide(currentFragment!!)
 
-            transaction.commit()
+                transaction = if (newFragment.isAdded) {
+                    transaction.show(newFragment)
+                } else {
+                    transaction.add(container, newFragment)
+                }
 
-            true
+                transaction.commit()
+
+                true
+            }
         }
 
 
