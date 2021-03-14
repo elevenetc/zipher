@@ -1,13 +1,15 @@
 package com.elevenetc.zipher.shared
 
 import com.elevenetc.zipher.AppDatabase
+import com.elevenetc.zipher.AppDatabaseQueries
 import com.elevenetc.zipher.Record
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
@@ -41,11 +43,11 @@ class Dao(private val dbDriverFactory: DatabaseDriverFactory) {
     }
 
     fun getById(id: String): Record? {
-        return safeDb().appDatabaseQueries.selectRecordById(id).executeAsOneOrNull()
+        return safeDb().selectRecordById(id).executeAsOneOrNull()
     }
 
     fun clearDb() {
-        safeDb().appDatabaseQueries.removeAllRecords()
+        safeDb().removeAllRecords()
     }
 
     @Throws(InvalidDbPassword::class)
@@ -70,27 +72,32 @@ class Dao(private val dbDriverFactory: DatabaseDriverFactory) {
     }
 
     fun update(record: Record) {
-        safeDb().appDatabaseQueries.update(record.name, record.id)
+        safeDb().update(record.name, record.id)
     }
 
     fun deleteById(id: String) {
-        safeDb().appDatabaseQueries.removeById(id)
+        safeDb().removeById(id)
     }
 
-    fun getAllRecords(): Flow<List<Record>> = flow {
-        emit(safeDb().appDatabaseQueries.selectAllRecords().executeAsList())
-    }.flowOn(Background)
+    fun getAllRecords(): Flow<List<Record>> {
+        return safeDb().selectAllRecords().asFlow().mapToList(Background)
+    }
+
+    fun getRecords(offset: Int, limit: Int): Flow<List<Record>> {
+        return safeDb().selectRecords(limit.toLong(), offset.toLong()).asFlow()
+            .mapToList(Background)
+    }
 
     fun getAllRecordsSync(): List<Record> {
-        return safeDb().appDatabaseQueries.selectAllRecords().executeAsList()
+        return safeDb().selectAllRecords().executeAsList()
     }
 
     fun insertRecord(name: String) {
-        safeDb().appDatabaseQueries.insertRecord(randomUUID(), name)
+        safeDb().insertRecord(randomUUID(), name)
     }
 
-    private fun safeDb(): AppDatabase {
+    private fun safeDb(): AppDatabaseQueries {
         if (db == null) throw IllegalStateException("DB is locked")
-        else return db!!
+        else return db!!.appDatabaseQueries
     }
 }

@@ -1,6 +1,8 @@
 CREATE TABLE Record(
     id TEXT NOT NULL PRIMARY KEY,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    creation_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 insertRecord:
@@ -19,11 +21,15 @@ SELECT * FROM Record
 WHERE id = ?;
 
 selectAllRecords:
-SELECT * FROM Record;
+SELECT * FROM Record ORDER BY datetime(creation_time) ASC;
+
+selectRecords:
+SELECT * FROM Record ORDER BY datetime(creation_time) ASC LIMIT :limit OFFSET :offset;
 
 update:
 UPDATE Record
-SET name = ?
+SET name = ?,
+update_time = CURRENT_TIMESTAMP
 WHERE id = ?;
 
 checkDb:
