@@ -9,11 +9,15 @@ import com.elevenetc.zipher.shared.LockViewModel.*
 import com.elevenetc.zipher.shared.ViewModel.StateTransition
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 
-class LockFragment : BaseFragment(R.layout.fragment_lock) {
+class LockFragment : BaseFragment<LockViewModel>(R.layout.fragment_lock) {
 
-    val vm: LockViewModel by inject()
+    init {
+        vm = get()
+    }
+
     val navigator: Navigator by inject()
 
     //lateinit var editPassword: EditText
@@ -73,7 +77,7 @@ class LockFragment : BaseFragment(R.layout.fragment_lock) {
         stateView.handleState(transition)
 
         if (state is LockCreated || state is Unlocked) {
-            navigator.replaceRootScreen(HomeFragment())
+            navigator.replaceRootScreen(HomeFragment.create())
         }
 
         //val stateView = view.findViewById<LockStateView>(R.id.lock_state_view)

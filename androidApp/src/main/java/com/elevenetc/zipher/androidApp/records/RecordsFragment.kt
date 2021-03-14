@@ -14,20 +14,18 @@ import com.elevenetc.zipher.androidApp.details.RecordDetailsFragment
 import com.elevenetc.zipher.androidApp.navigation.Navigator
 import com.elevenetc.zipher.shared.Dao
 import com.elevenetc.zipher.shared.ViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-class RecordsFragment : BaseFragment(R.layout.fragment_home) {
+class RecordsFragment : BaseFragment<RecordsViewModel>(R.layout.fragment_home) {
+
+    init {
+        vm = RecordsViewModel(App.dao)
+    }
 
     val recordsRepository: Dao by inject()
     val navigator: Navigator by inject()
-
-    val backScope = CoroutineScope(Dispatchers.IO)
-
-    val vm = RecordsViewModel(App.dao)
     val adapter = RecordsAdapter { selectedRecord ->
         openDetails(selectedRecord)
     }
@@ -43,13 +41,10 @@ class RecordsFragment : BaseFragment(R.layout.fragment_home) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        //val allRecords = recordsRepository.getRecords(0, 10)
 
         view.findViewById<View>(R.id.btn_add_record).setOnClickListener {
-            backScope.launch {
-                val time = System.currentTimeMillis().toString()
-                recordsRepository.insertRecord(time)
-            }
+            val time = System.currentTimeMillis().toString()
+            vm.onUserAction(RecordsViewModel.CreateRecord(time))
         }
 
         val recordsRecycler = view.findViewById<RecyclerView>(R.id.records_recycler)
@@ -80,17 +75,17 @@ class RecordsFragment : BaseFragment(R.layout.fragment_home) {
                     adapter.add(state.flow, state.page)
                 }
             }
-
-//            allRecords.collect { records ->
-//                recordsRecycler.adapter = RecordsAdapter(records) { selectedRecord ->
-//                    openDetails(selectedRecord)
-//                }
-//            }
         }
     }
 
     private fun openDetails(record: Record) {
         val fragment = RecordDetailsFragment.create(record.id)
         navigator.addRootScreen(fragment, true)
+    }
+
+    companion object {
+        fun create(): RecordsFragment {
+            return RecordsFragment()
+        }
     }
 }

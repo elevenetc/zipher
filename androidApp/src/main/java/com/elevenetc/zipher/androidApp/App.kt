@@ -12,8 +12,10 @@ import org.koin.dsl.module
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        val dbDriverFactory = DatabaseDriverFactory(this)
-        dao = Dao(dbDriverFactory)
+        val dbFileName = "app.db"
+        val dbDriverFactory = DatabaseDriverFactory(dbFileName, this)
+        val dbFileHandler = DbFileHandler(dbFileName, this)
+        dao = Dao(dbDriverFactory, dbFileHandler)
 
         val navigator = Navigator(
             Navigator.Config(

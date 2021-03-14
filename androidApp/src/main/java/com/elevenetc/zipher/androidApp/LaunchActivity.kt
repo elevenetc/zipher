@@ -32,7 +32,7 @@ class LauncherActivity : AppCompatActivity(), CoroutineScope {
                 if (lockRepository.state == LockRepository.State.Locked) {
                     navigator.addRootScreen(LockFragment(), false)
                 } else {
-                    navigator.addRootScreen(HomeFragment(), false)
+                    navigator.addRootScreen(HomeFragment.create(), false)
                 }
             }
 

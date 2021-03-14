@@ -9,10 +9,15 @@ class SettingsViewModel(val lockRepository: LockRepository) : ViewModel() {
         if (action is Lock) {
             lockRepository.lock()
             updateState(Locked)
+        } else if (action is Clear) {
+            lockRepository.deleteDb()
+            updateState(DbDeleted)
         }
     }
 
     object Locked : ViewState()
+    object DbDeleted : ViewState()
 
     object Lock : UserAction()
+    object Clear : UserAction()
 }

@@ -7,12 +7,12 @@ import com.squareup.sqldelight.db.SqlDriver
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 
-actual class DatabaseDriverFactory(val context: Context) {
+actual class DatabaseDriverFactory(val dbFileName: String, val context: Context) {
     actual fun createDriver(key: String): SqlDriver {
         return AndroidSqliteDriver(
             AppDatabase.Schema,
             context,
-            "app.db",
+            dbFileName,
             factory = SupportFactory(
                 SQLiteDatabase.getBytes(key.toCharArray())
             )

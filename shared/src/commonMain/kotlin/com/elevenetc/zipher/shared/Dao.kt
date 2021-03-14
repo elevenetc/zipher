@@ -10,11 +10,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
 
-class Dao(private val dbDriverFactory: DatabaseDriverFactory) {
+class Dao(
+    private val dbDriverFactory: DatabaseDriverFactory,
+    private val dbFileHandler: DbFileHandler
+) {
 
     private var db: AppDatabase? = null
 
@@ -44,6 +48,11 @@ class Dao(private val dbDriverFactory: DatabaseDriverFactory) {
 
     fun getById(id: String): Record? {
         return safeDb().selectRecordById(id).executeAsOneOrNull()
+    }
+
+    fun deleteDb() {
+        dbFileHandler.delete()
+        db = null
     }
 
     fun clearDb() {

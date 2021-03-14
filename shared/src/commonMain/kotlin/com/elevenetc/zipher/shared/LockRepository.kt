@@ -23,6 +23,16 @@ class LockRepository(val dao: Dao, val keyValue: KeyValueStorage) {
         }
     }
 
+    fun deleteDb() {
+        dao.deleteDb()
+        keyValue.clear()
+        state = Locked
+    }
+
+    fun clear() {
+        dao.clearDb()
+    }
+
     fun lock() {
         if (!isLocked()) {
             state = Locked

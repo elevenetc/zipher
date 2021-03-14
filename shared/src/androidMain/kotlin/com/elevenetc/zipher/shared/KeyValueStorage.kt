@@ -22,4 +22,8 @@ actual class KeyValueStorage(val context: Context) {
         return prefs.getBoolean(key, defaultValue)
     }
 
+    actual fun clear() {
+        prefs.edit().clear().apply()
+    }
+
 }

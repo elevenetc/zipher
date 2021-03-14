@@ -13,6 +13,8 @@ class RecordsViewModel(val dao: Dao) : ViewModel() {
             val limit = action.limit
             val page = action.page
             updateState(Result(dao.getRecords(offset, limit), page, offset, limit))
+        } else if (action is CreateRecord) {
+            dao.insertRecord(action.name)
         }
     }
 
@@ -23,5 +25,6 @@ class RecordsViewModel(val dao: Dao) : ViewModel() {
         val limit: Int
     ) : ViewState()
 
+    data class CreateRecord(val name: String) : UserAction()
     data class GetRecords(val page: Int, val offset: Int, val limit: Int) : UserAction()
 }

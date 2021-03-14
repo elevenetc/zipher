@@ -31,7 +31,7 @@ class HomeFragment : Fragment() {
 
         navView.initNavigation(
             linkedMapOf(
-                Pair(R.id.navigation_home, RecordsFragment()),
+                Pair(R.id.navigation_home, RecordsFragment.create()),
                 Pair(R.id.navigation_dashboard, Fragment()),
                 Pair(R.id.navigation_settings, SettingsFragment())
             ),
@@ -39,6 +39,11 @@ class HomeFragment : Fragment() {
             this,
             savedInstanceState
         )
+    }
+
+    override fun onDestroy() {
+        println("home destroyed")
+        super.onDestroy()
     }
 
     companion object {
